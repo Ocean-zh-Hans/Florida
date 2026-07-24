@@ -1,0 +1,148 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Ocean-zh-Hans <ocean@example.com>
+Date: Fri, 24 Jul 2026 00:00:00 +0800
+Subject: [PATCH 11/16] Florida: enhance anti-anti-frida.py with comprehensive
+ sweep
+
+---
+ src/anti-anti-frida.py | 84 +++++++++++++++++++++++++++++++++---------
+ 1 file changed, 67 insertions(+), 17 deletions(-)
+
+diff --git a/src/anti-anti-frida.py b/src/anti-anti-frida.py
+index d1ce5f62..a8b3f7e1 100644
+--- a/src/anti-anti-frida.py
++++ b/src/anti-anti-frida.py
+@@ -1,11 +1,13 @@
+ import lief
+ import sys
+ import random
+ import os
+-
++import re
++
+ def log_color(msg):
+     print(f"\033[1;31;40m{msg}\033[0m")
+-
++
++
+ if __name__ == "__main__":
+     input_file = sys.argv[1]
+     random_charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+@@ -15,22 +17,37 @@ if __name__ == "__main__":
+     if not binary:
+         log_color(f"[*] Not elf, exit")
+         exit()
+-
++
++    # --- Stage 1: Symbol patching ---
+     random_name = "".join(random.sample(random_charset, 5))
+-    log_color(f"[*] Patch `frida` to `{random_name}`")
++    log_color(f"[*] Symbol: patch `frida` prefix to `{random_name}`")
+
+     for symbol in binary.symbols:
+-        if symbol.name == "frida_agent_main":
++        # Rename entry point
++        if symbol.name in ("frida_agent_main", "_frida_agent_main"):
+             symbol.name = "main"
+-
+-        if "frida" in symbol.name:
+-            symbol.name = symbol.name.replace("frida", random_name)
+-
+-        if "FRIDA" in symbol.name:
+-            symbol.name = symbol.name.replace("FRIDA", random_name)
+-
+-    all_patch_string = ["FridaScriptEngine", "GLib-GIO", "GDBusProxy", "GumScript"]  # 字符串特征修改 尽量与源字符一样
++
++        # Comprehensive prefix-rename for all frida/Frida FRIDA_ prefixed symbols
++        # Also handles: frida_zymbiote_*, FRIDA_AGENT_*, etc.
++        if symbol.name.startswith("frida_") or symbol.name.startswith("_frida_"):
++            stem = symbol.name
++            if stem.startswith("_"):
++                stem = stem[1:]
++            symbol.name = stem.replace("frida", random_name, 1)
++
++        if symbol.name.startswith("Frida"):
++            # GObject type symbols like FridaDevice, FridaSession, etc.
++            symbol.name = symbol.name.replace("Frida", "Gbond", 1)
++
++        if symbol.name.startswith("FRIDA"):
++            symbol.name = symbol.name.replace("FRIDA", random_name.upper(), 1)
++
++        if symbol.name.startswith("frida"):
++            # Catch any remaining lowercase frida prefix not caught above
++            symbol.name = symbol.name.replace("frida", random_name, 1)
++
++    # --- Stage 2: .rodata string reversal ---
++    all_patch_string = ["FridaScriptEngine", "GLib-GIO", "GDBusProxy", "GumScript", "Frida"]  # "Frida" catches remaining standalone refs
+     for section in binary.sections:
+         if section.name != ".rodata":
+             continue
+@@ -40,22 +57,55 @@ if __name__ == "__main__":
+                 patch = [ord(n) for n in list(patch_str)[::-1]]
+                 log_color(f"[*] Patching section name={section.name} offset={hex(section.file_offset + addr)} orig:{patch_str} new:{''.join(list(patch_str)[::-1])}")
+                 binary.patch_address(section.file_offset + addr, patch)
+-
++
+     binary.write(input_file)
+-
+-    # thread_gum_js_loop
++
++    # --- Stage 3: Thread name randomization (in-place binary sed) ---
++    # Known frida thread names to replace with random strings of same length
++    # This catches strings in .rodata, .strtab, and other non-executable sections
++
++    # gum-js-loop (11 chars)
+     random_name = "".join(random.sample(random_charset, 11))
+-    log_color(f"[*] Patch `gum-js-loop` to `{random_name}`")
++    log_color(f"[*] Thread: `gum-js-loop` -> `{random_name}`")
+     os.system(f"sed -b -i s/gum-js-loop/{random_name}/g {input_file}")
+-
+-    # thread_gmain
++
++    # gmain (5 chars)
+     random_name = "".join(random.sample(random_charset, 5))
+-    log_color(f"[*] Patch `gmain` to `{random_name}`")
++    log_color(f"[*] Thread: `gmain` -> `{random_name}`")
+     os.system(f"sed -b -i s/gmain/{random_name}/g {input_file}")
+-
+-    # thread_gdbus
++
++    # gdbus (5 chars)
+     random_name = "".join(random.sample(random_charset, 5))
+-    log_color(f"[*] Patch `gdbus` to `{random_name}`")
++    log_color(f"[*] Thread: `gdbus` -> `{random_name}`")
+     os.system(f"sed -b -i s/gdbus/{random_name}/g {input_file}")
+
++    # pool-frida (10 chars)
++    random_name = "".join(random.sample(random_charset, 10))
++    log_color(f"[*] Thread: `pool-frida` -> `{random_name}`")
++    os.system(f"sed -b -i s/pool-frida/{random_name}/g {input_file}")
++
++    # pool-spawner (12 chars)
++    random_name = "".join(random.sample(random_charset, 12))
++    log_color(f"[*] Thread: `pool-spawner` -> `{random_name}`")
++    os.system(f"sed -b -i s/pool-spawner/{random_name}/g {input_file}")
++
++    # frida-main-loop (15 chars)
++    random_name = "".join(random.sample(random_charset, 15))
++    log_color(f"[*] Thread: `frida-main-loop` -> `{random_name}`")
++    os.system(f"sed -b -i s/frida-main-loop/{random_name}/g {input_file}")
++
++    # --- Stage 4: Build path cleanup ---
++    # Remove embedded build paths (compiler artifact)
++    log_color(f"[*] Build paths: cleaning compiler-embedded paths")
++    os.system(f"sed -b -i 's|/home/oleavr/|/dev/null/|g' {input_file}")
++    os.system(f"sed -b -i 's|/Users/runner/|/tmp/build/|g' {input_file}")
++
++    # --- Stage 5: Version string cleanup ---
++    # Remove "Frida/X.Y.Z" user-agent strings if present
++    # Use targeted sed to replace Frida version prefix
++    os.system(f"sed -b -i 's|Frida/|Radar/|g' {input_file}")
++
++    # --- Stage 6: Final catch-all sweep (least invasive) ---
++    # Catch any remaining "frida-" path patterns in .rodata
++    os.system(f"sed -b -i 's|frida-zymbiote-|gcore-zymbiote-|g' {input_file}")
++    os.system(f"sed -b -i 's|/frida-|/gcore-|g' {input_file}")
++
+     log_color(f"[*] Patch Finish")
+\ No newline at end of file

@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Ocean-zh-Hans <ocean@example.com>
+Date: Fri, 24 Jul 2026 00:00:00 +0800
+Subject: [PATCH 14/16] Florida: rename temporary file prefix
+
+Rename "frida-" prefix in Frida.System.make_name()
+to "gcore-" to avoid detection via temporary files.
+
+---
+ src/system.vala | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/system.vala b/src/system.vala
+index 998ef8cc..e14bd59a 100644
+--- a/src/system.vala
++++ b/src/system.vala
+@@ -240,7 +240,7 @@ namespace Frida {
+
+ 		public static string make_name () {
+-			var builder = new StringBuilder ("frida-");
++			var builder = new StringBuilder ("gcore-");
+ 			for (var i = 0; i != 16; i++)
+ 				builder.append_printf ("%02x", Random.int_range (0, 256));
+ 			return builder.str;
