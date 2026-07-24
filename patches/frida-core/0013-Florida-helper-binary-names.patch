@@ -1,4 +1,4 @@
-From 82f2e428e64462a25bbd29cfb82446418689adf4 Mon Sep 17 00:00:00 2001
+From 0b1e6071b942bb30f978d3ca3d8ea2cbf05b4dc0 Mon Sep 17 00:00:00 2001
 From: Termux Build <termux@local>
 Date: Fri, 24 Jul 2026 19:10:54 +0800
 Subject: [PATCH] 0013: helper-binary-names
