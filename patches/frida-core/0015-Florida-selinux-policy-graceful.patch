@@ -1,0 +1,29 @@
+From b38a93d363886dcd1f06bed628a0bcb9fe80a13c Mon Sep 17 00:00:00 2001
+From: Termux Build <termux@local>
+Date: Fri, 24 Jul 2026 20:34:36 +0800
+Subject: [PATCH] 0015: skip SELinux patching on policyvers too new
+
+---
+ lib/selinux/patch.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/lib/selinux/patch.c b/lib/selinux/patch.c
+index db631ffd..14ff0ac1 100644
+--- a/lib/selinux/patch.c
++++ b/lib/selinux/patch.c
+@@ -80,7 +80,11 @@ frida_selinux_patch_policy (void)
+   }
+ 
+   res = policydb_load_isids (&db, &sidtab);
+-  g_assert (res == 0);
++  if (res != 0)
++  {
++    g_printerr ("Unable to load SELinux ISIDs from the kernel policy (policy too new?); skipping SELinux patching\n");
++    goto beach;
++  }
+ 
+   if (frida_ensure_type (&db, "frida_file", 2, "file_type", "mlstrustedobject", &error) == NULL)
+   {
+-- 
+2.55.0
+
