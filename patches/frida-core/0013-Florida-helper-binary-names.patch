@@ -1,11 +1,7 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Ocean-zh-Hans <ocean@example.com>
-Date: Fri, 24 Jul 2026 00:00:00 +0800
-Subject: [PATCH 13/16] Florida: rename helper binary names
-
-Rename embedded helper binaries from "frida-helper-32/64"
-to "gcore-helper-a32/a64" to avoid detection via
-/proc/self/maps and process lists.
+From 82f2e428e64462a25bbd29cfb82446418689adf4 Mon Sep 17 00:00:00 2001
+From: Termux Build <termux@local>
+Date: Fri, 24 Jul 2026 19:10:54 +0800
+Subject: [PATCH] 0013: helper-binary-names
 
 ---
  src/embed-helper.py | 4 ++--
@@ -15,13 +11,17 @@ diff --git a/src/embed-helper.py b/src/embed-helper.py
 index 35c5c9f7..61c7bbb1 100644
 --- a/src/embed-helper.py
 +++ b/src/embed-helper.py
-@@ -53,8 +53,8 @@ def main(argv):
- 		embedded_assets += [embedded_helper]
- 	else:
--		embedded_helper_modern = priv_dir / f"frida-helper-64"
--		embedded_helper_legacy = priv_dir / f"frida-helper-32"
-+		embedded_helper_modern = priv_dir / f"gcore-helper-a64"
-+		embedded_helper_legacy = priv_dir / f"gcore-helper-a32"
+@@ -51,8 +51,8 @@ def main(argv):
+ 
+         embedded_assets += [embedded_helper]
+     else:
+-        embedded_helper_modern = priv_dir / f"frida-helper-64"
+-        embedded_helper_legacy = priv_dir / f"frida-helper-32"
++        embedded_helper_modern = priv_dir / f"gcore-helper-a64"
++        embedded_helper_legacy = priv_dir / f"gcore-helper-a32"
+ 
+         if helper_modern is not None:
+             shutil.copy(helper_modern, embedded_helper_modern)
+-- 
+2.55.0
 
- 		if helper_modern is not None:
- 			shutil.copy(helper_modern, embedded_helper_modern)

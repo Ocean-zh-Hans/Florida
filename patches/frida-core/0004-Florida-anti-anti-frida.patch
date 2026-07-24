@@ -1,0 +1,69 @@
+From a98fccc39b8f0fdf36dde1e813ade1359dad204c Mon Sep 17 00:00:00 2001
+From: Termux Build <termux@local>
+Date: Fri, 24 Jul 2026 19:09:52 +0800
+Subject: [PATCH] 0004: anti-anti-frida with threads + rodata
+
+---
+ src/anti-anti-frida.py | 50 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 50 insertions(+)
+ create mode 100644 src/anti-anti-frida.py
+
+diff --git a/src/anti-anti-frida.py b/src/anti-anti-frida.py
+new file mode 100644
+index 00000000..3b4cb954
+--- /dev/null
++++ b/src/anti-anti-frida.py
+@@ -0,0 +1,50 @@
++import lief
++import sys
++import random
++import os
++
++def log_color(msg):
++    print(f"\033[1;31;40m{msg}\033[0m")
++
++if __name__ == "__main__":
++    input_file = sys.argv[1]
++    random_charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
++    log_color(f"[*] Patch frida-agent: {input_file}")
++    binary = lief.parse(input_file)
++
++    if not binary:
++        log_color(f"[*] Not elf, exit")
++        exit()
++
++    random_name = "".join(random.sample(random_charset, 5))
++    log_color(f"[*] Symbol: patch `frida` prefix to `{random_name}`")
++
++    for symbol in binary.symbols:
++        if symbol.name == "frida_agent_main":
++            symbol.name = "main"
++        if "frida" in symbol.name:
++            symbol.name = symbol.name.replace("frida", random_name)
++        if "FRIDA" in symbol.name:
++            symbol.name = symbol.name.replace("FRIDA", random_name)
++
++    # .rodata string reversal
++    all_patch_string = ["FridaScriptEngine", "GLib-GIO", "GDBusProxy", "GumScript"]
++    for section in binary.sections:
++        if section.name != ".rodata":
++            continue
++        for patch_str in all_patch_string:
++            addr_all = section.search_all(patch_str)
++            for addr in addr_all:
++                patch = [ord(n) for n in list(patch_str)[::-1]]
++                log_color(f"[*] Patching section {section.name} offset {hex(section.file_offset + addr)}: {patch_str} -> {''.join(list(patch_str)[::-1])}")
++                binary.patch_address(section.file_offset + addr, patch)
++
++    binary.write(input_file)
++
++    # Thread name randomizations
++    for name, length in [("gum-js-loop", 11), ("gmain", 5), ("gdbus", 5), ("pool-frida", 10)]:
++        rn = "".join(random.sample(random_charset, length))
++        log_color(f"[*] Thread: `{name}` -> `{rn}`")
++        os.system(f"sed -b -i s/{name}/{rn}/g {input_file}")
++
++    log_color(f"[*] Patch Finish")
+-- 
+2.55.0
+
