@@ -1,4 +1,4 @@
-From 82e3530664a90ab58e8e9c09394ecab93c0cb854 Mon Sep 17 00:00:00 2001
+From 2ddd628265193c428980b4411e2c884add8fbc48 Mon Sep 17 00:00:00 2001
 From: Termux Build <termux@local>
 Date: Fri, 24 Jul 2026 19:10:54 +0800
 Subject: [PATCH] 0011: enhanced anti-anti-frida

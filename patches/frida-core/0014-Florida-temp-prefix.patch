@@ -1,4 +1,4 @@
-From a8cbdd4db68e8bd84ef498238220ff6304f158f5 Mon Sep 17 00:00:00 2001
+From 5f92da1e62ce56ad43f8491f154801c1bb729c31 Mon Sep 17 00:00:00 2001
 From: Termux Build <termux@local>
 Date: Fri, 24 Jul 2026 19:10:54 +0800
 Subject: [PATCH] 0014: temp-prefix

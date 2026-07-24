@@ -1,4 +1,4 @@
-From a0440a2ad17ad29f34bf69ab7bcfb0192f7e309b Mon Sep 17 00:00:00 2001
+From a5e5b0638c744677a09800327e48ee5923249666 Mon Sep 17 00:00:00 2001
 From: Termux Build <termux@local>
 Date: Fri, 24 Jul 2026 19:21:36 +0800
 Subject: [PATCH] 0008: exec anti-anti-frida

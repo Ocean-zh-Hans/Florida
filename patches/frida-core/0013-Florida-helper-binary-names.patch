@@ -1,11 +1,12 @@
-From 0b1e6071b942bb30f978d3ca3d8ea2cbf05b4dc0 Mon Sep 17 00:00:00 2001
+From 00f186c49df59b47dffe929b4b56ea721ac0084e Mon Sep 17 00:00:00 2001
 From: Termux Build <termux@local>
 Date: Fri, 24 Jul 2026 19:10:54 +0800
 Subject: [PATCH] 0013: helper-binary-names
 
 ---
- src/embed-helper.py | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ src/embed-helper.py                 | 4 ++--
+ src/linux/frida-helper-process.vala | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/src/embed-helper.py b/src/embed-helper.py
 index 35c5c9f7..61c7bbb1 100644
@@ -22,6 +23,24 @@ index 35c5c9f7..61c7bbb1 100644
  
          if helper_modern is not None:
              shutil.copy(helper_modern, embedded_helper_modern)
+diff --git a/src/linux/frida-helper-process.vala b/src/linux/frida-helper-process.vala
+index 4d2317ff..c62d4ac3 100644
+--- a/src/linux/frida-helper-process.vala
++++ b/src/linux/frida-helper-process.vala
+@@ -651,11 +651,11 @@ namespace Frida {
+ 			this.tempdir = tempdir;
+ 
+ #if HAVE_EMBEDDED_ASSETS
+-			var blob32 = Frida.Data.Helper.get_frida_helper_32_blob ();
++			var blob32 = Frida.Data.Helper.get_gcore_helper_a32_blob ();
+ 			if (blob32.data.length > 0)
+ 				helper32 = make_temporary_helper ("frida-helper-32", blob32.data);
+ 
+-			var blob64 = Frida.Data.Helper.get_frida_helper_64_blob ();
++			var blob64 = Frida.Data.Helper.get_gcore_helper_a64_blob ();
+ 			if (blob64.data.length > 0)
+ 				helper64 = make_temporary_helper ("frida-helper-64", blob64.data);
+ #else
 -- 
 2.55.0
 

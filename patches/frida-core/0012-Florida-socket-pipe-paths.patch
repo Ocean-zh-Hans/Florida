@@ -1,4 +1,4 @@
-From f657346c2e35a40f8a186ad26aadba8bf464ba0a Mon Sep 17 00:00:00 2001
+From 18dd6cef5a14f95bf118aa7a5746439d07a5f798 Mon Sep 17 00:00:00 2001
 From: Termux Build <termux@local>
 Date: Fri, 24 Jul 2026 19:10:54 +0800
 Subject: [PATCH] 0012: socket-pipe-paths
